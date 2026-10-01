@@ -50,6 +50,30 @@ def test_bag_saved_snapshot_is_truth(tmp_db):
     assert again["paper_m2"] == detail["paper_m2"]
 
 
+def test_bag_detail_ignores_current_box_edges(tmp_db):
+    # 袋单落库后把盒边改掉：详情禁止用现行盒边重算六面面积
+    r = estimate_service.run_estimate(1, None, "cross", True, "", mode="bag", gusset=0.10)
+    rid, written = r["run_id"], r["paper_m2"]
+
+    c = db.connect()
+    try:
+        c.execute("UPDATE boxes SET length=0.99, width=0.88, height=0.77 WHERE id=1")
+        c.commit()
+    finally:
+        c.close()
+
+    listed = [x for x in history.list_runs() if x["id"] == rid][0]["result"]
+    detail = history.get_run(rid)["result"]
+    assert detail["mode"] == "bag"
+    assert detail["gusset_m"] == 0.1
+    assert detail["paper_m2"] == written
+    assert detail["paper_m2"] == listed["paper_m2"]
+    assert not detail.get("open_bag_flattened")
+    # 详情不得混入六面口径的 box_surface/base_surface
+    assert "box_surface" not in detail
+    assert "base_surface" not in detail
+
+
 def test_bag_nonpositive_gusset_fails_and_persists_nothing(tmp_db):
     before = len(history.list_runs())
     with pytest.raises(HTTPException) as ei:

@@ -17,7 +17,7 @@ onMounted(async () => {
 <template>
   <div class="page">
     <h1>用纸档</h1>
-    <p class="hint">列表钉写入摘要（mode / paper_m2）；详情走开放视图字段。</p>
+    <p class="hint">列表与详情同源：都读写入快照（mode / gusset_m / paper_m2），不按现行盒边重算。</p>
     <p class="lede">算纸页「写入用纸档」后的落库快照。mode / gusset_m / paper_m² 以写入值为准，改默认底褶不影响旧档。</p>
     <p v-if="err" class="bad">{{ err }}</p>
     <p v-else-if="!items.length" class="empty">还没有写入过。先去算纸试一单。</p>

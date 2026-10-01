@@ -1,5 +1,5 @@
 <script setup>
-// open-view: 开放视图：袋装标记保留，面积取六面开放路径
+// 回看只读落库快照：袋装面积按写入时的袋宽/袋高/底风琴褶，不按现行盒边重算
 
 import { onMounted, ref } from 'vue'
 import { getJSON } from '../api'

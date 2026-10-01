@@ -52,15 +52,9 @@ def get_run(run_id):
             return None
         d = dict(row)
         raw = _normalize(json.loads(d.pop("result_json")))
-        d["result"] = shape_detail(
-            raw,
-            {
-                "length": d.get("box_length"),
-                "width": d.get("box_width"),
-                "height": d.get("box_height"),
-                "overlap": d.get("overlap"),
-            },
-        )
+        # 详情与列表同源：paper_m2/mode/gusset_m 只读取写入快照，
+        # join 出来的现行盒边仅供展开示意图，绝不参与面积计算。
+        d["result"] = shape_detail(raw)
         return d
     finally:
         c.close()
