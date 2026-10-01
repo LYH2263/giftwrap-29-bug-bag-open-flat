@@ -69,3 +69,29 @@ def test_box_mode_keeps_six_face(tmp_db):
     assert r["mode"] == "box"
     assert r["gusset_m"] is None
     assert r["paper_m2"] == round(2 * (0.30 * 0.20 + 0.30 * 0.15 + 0.20 * 0.15) * 1.15, 3)
+
+
+def test_bag_detail_not_recomputed_from_current_box(tmp_db):
+    r = estimate_service.run_estimate(1, None, "cross", True, "", mode="bag", gusset=0.10)
+    rid = r["run_id"]
+
+    # 盒档事后被改：详情仍回放写入快照，禁止按现行盒边重算
+    c = db.connect()
+    try:
+        c.execute("UPDATE boxes SET length=0.9, width=0.9, height=0.9 WHERE id=1")
+        c.commit()
+    finally:
+        c.close()
+
+    detail = history.get_run(rid)["result"]
+    assert detail["mode"] == "bag"
+    assert detail["gusset_m"] == 0.1
+    assert detail["paper_m2"] == _bag_calc(0.30, 0.20, 0.10, 1.15)
+
+
+def test_box_saved_detail_keeps_six_face(tmp_db):
+    r = estimate_service.run_estimate(1, None, "cross", True, "", mode="box")
+    detail = history.get_run(r["run_id"])["result"]
+    assert detail["mode"] == "box"
+    assert detail["gusset_m"] is None
+    assert detail["paper_m2"] == round(2 * (0.30 * 0.20 + 0.30 * 0.15 + 0.20 * 0.15) * 1.15, 3)

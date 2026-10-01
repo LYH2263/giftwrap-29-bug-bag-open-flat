@@ -1,5 +1,5 @@
 <script setup>
-// open-view: 开放视图：袋装标记保留，面积取六面开放路径
+// open-view: 详情只回放落库快照（mode / gusset_m / paper_m2），面积不按现行盒边重算
 
 import { onMounted, ref } from 'vue'
 import { getJSON } from '../api'
